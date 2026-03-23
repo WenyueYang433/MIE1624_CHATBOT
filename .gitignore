@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+node_modules/
+.env
+*.log
+.vscode/
+.DS_Store
+python_backend/faiss_index/
+*.faiss
+*.pkl

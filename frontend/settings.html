@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Chatbot Settings</h1>
+
+    <div class="settings-group">
+      <label>
+        <span>Enable TTS</span>
+        <input type="checkbox" id="enableTTS" />
+      </label>
+    </div>
+
+    <div class="settings-group">
+      <label>
+        <span>Enable Retrieval</span>
+        <input type="checkbox" id="enableRetrieval" checked />
+      </label>
+    </div>
+
+    <div class="settings-actions">
+      <button id="saveBtn" type="button">Save</button>
+      <button id="resetBtn" type="button">Reset</button>
+      <a href="index.html"><button type="button">Back</button></a>
+    </div>
+
+    <div id="saveStatus"></div>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>

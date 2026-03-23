@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Canada AI Strategy Chatbot</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <div class="chat-panel">
+      <div class="container">
+        <div class="top-bar">
+          <h1>Canada AI Strategy Chatbot</h1>
+          <div class="top-actions">
+            <a href="settings.html" class="settings-link">Settings</a>
+          </div>
+        </div>
+
+        <div id="status">Idle</div>
+
+        <div id="chatList" class="chat-list"></div>
+
+        <div class="controls">
+          <textarea id="userText" placeholder="Ask something about Canada's AI strategy..."></textarea>
+          <div class="buttons">
+            <button id="micBtn">🎙️</button>
+            <button id="sendBtn">Send</button>
+            <button id="stopBtn">Stop Audio</button>
+            <button id="clearBtn">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="agent-panel">
+      <div class="agent-header">
+        <h2>Agent Activity</h2>
+      </div>
+      <div id="agentLog" class="agent-log">
+        <div class="log-item">
+          <div class="log-agent">System</div>
+          <div class="log-message">Waiting for a question...</div>
+          <div class="log-time">--:--:--</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
