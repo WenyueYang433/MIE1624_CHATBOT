@@ -3,12 +3,25 @@ from chatbot import run_chatbot
 
 app = Flask(__name__)
 
+def to_bool(value, default=True):
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        v = value.strip().lower()
+        if v == "true":
+            return True
+        if v == "false":
+            return False
+    if value is None:
+        return default
+    return bool(value)
+
 @app.route("/api/chatbot", methods=["POST"])
 def chatbot_api():
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True) or {}
         message = str(data.get("message", "")).strip()
-        use_retrieval = bool(data.get("use_retrieval", True))
+        use_retrieval = to_bool(data.get("use_retrieval", True), True)
 
         if not message:
             return jsonify({"reply": "Message is empty.", "logs": []}), 400

@@ -9,8 +9,10 @@ function loadSettings() {
 }
 
 function fillForm(settings) {
-  document.getElementById("enableTTS").checked = settings.enableTTS ?? defaultSettings.enableTTS;
-  document.getElementById("enableRetrieval").checked = settings.enableRetrieval ?? defaultSettings.enableRetrieval;
+  document.getElementById("enableTTS").checked =
+    settings.enableTTS ?? defaultSettings.enableTTS;
+  document.getElementById("enableRetrieval").checked =
+    settings.enableRetrieval ?? defaultSettings.enableRetrieval;
 }
 
 function readForm() {

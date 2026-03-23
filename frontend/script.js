@@ -42,13 +42,11 @@ function addMessage(text, role) {
   if (!chatList) return null;
   const div = document.createElement("div");
   div.className = `message ${role}`;
-
   if (role === "bot") {
     div.innerHTML = renderMarkdown(text);
   } else {
     div.textContent = text;
   }
-
   chatList.appendChild(div);
   chatList.scrollTop = chatList.scrollHeight;
   return div;
@@ -142,23 +140,23 @@ function clearAgentLog() {
   agentLog.innerHTML = "";
 }
 
-function stopCurrentAudio() {
-  if (!currentAudio) return;
-  currentAudio.pause();
-  currentAudio.currentTime = 0;
-  currentAudio = null;
-}
-
 async function renderLogsSequentially(logs, speed = 20, token = 0) {
   if (!Array.isArray(logs) || !logs.length) {
     if (token !== logRenderToken) return;
     await typeAgentLog("System", "No detailed agent logs were returned.", speed);
     return;
   }
-
   for (const log of logs) {
     if (token !== logRenderToken) return;
     await typeAgentLog(log.agent || "System", log.message || "", speed);
+  }
+}
+
+function stopCurrentAudio() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
   }
 }
 
@@ -167,8 +165,8 @@ async function sendMessage() {
   if (!question) return;
 
   const settings = getSettings();
-  const useRetrieval = settings.enableRetrieval;
   const enableTTS = settings.enableTTS;
+  const useRetrieval = settings.enableRetrieval;
 
   addMessage(question, "user");
   userText.value = "";
@@ -186,8 +184,12 @@ async function sendMessage() {
     addAgentLog("Assistant", "Using direct chat mode.");
   }
 
+  addAgentLog("System", `TTS setting: ${enableTTS ? "ON" : "OFF"}.`);
+
   const loadingEl = showAgentLoading(
-    useRetrieval ? "Agents are analyzing and retrieving evidence..." : "Agents are analyzing the question..."
+    useRetrieval
+      ? "Agents are analyzing and retrieving evidence..."
+      : "Agents are analyzing the question..."
   );
   const chatLoadingEl = showChatLoading("Assistant is thinking...");
 
@@ -199,8 +201,8 @@ async function sendMessage() {
       },
       body: JSON.stringify({
         message: question,
-        use_retrieval: useRetrieval,
-        enable_tts: enableTTS
+        enable_tts: enableTTS,
+        use_retrieval: useRetrieval
       })
     });
 
@@ -217,17 +219,23 @@ async function sendMessage() {
     addMessage(replyText, "bot");
     statusEl.textContent = "Done";
 
+    clearAgentLog();
+    renderLogsSequentially(data.logs, 20, currentToken);
+
     if (enableTTS && data.audio) {
       stopCurrentAudio();
       currentAudio = new Audio(data.audio);
+      addAgentLog("System", "TTS audio generated successfully.");
       currentAudio.play().catch(err => {
-        console.error("Audio playback failed:", err);
-        addAgentLog("System", "Audio playback failed.");
+        console.error("Audio play failed:", err);
+        addAgentLog("System", "TTS audio playback failed.");
       });
+      currentAudio.onended = () => {
+        currentAudio = null;
+      };
+    } else if (enableTTS && !data.audio) {
+      addAgentLog("System", "TTS was requested, but no audio was returned.");
     }
-
-    clearAgentLog();
-    renderLogsSequentially(data.logs, 20, currentToken);
   } catch (err) {
     removeAgentLoading(loadingEl);
     removeChatLoading(chatLoadingEl);
@@ -255,19 +263,19 @@ if (userText) {
 if (clearBtn) {
   clearBtn.addEventListener("click", () => {
     logRenderToken += 1;
+    stopCurrentAudio();
     if (chatList) chatList.innerHTML = "";
     clearAgentLog();
     addAgentLog("System", "Waiting for a question...");
     statusEl.textContent = "Idle";
-    stopCurrentAudio();
   });
 }
 
 if (stopBtn) {
   stopBtn.addEventListener("click", () => {
     stopCurrentAudio();
-    statusEl.textContent = "Audio stopped";
-    addAgentLog("System", "Audio playback stopped.");
+    addAgentLog("System", "Current audio stopped.");
+    statusEl.textContent = "Idle";
   });
 }
 
