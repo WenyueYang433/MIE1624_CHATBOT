@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from chatbot import run_chatbot
+import os
 
 app = Flask(__name__)
 
@@ -15,6 +16,10 @@ def to_bool(value, default=True):
     if value is None:
         return default
     return bool(value)
+
+@app.get("/health")
+def health():
+    return {"ok": True}
 
 @app.route("/api/chatbot", methods=["POST"])
 def chatbot_api():
@@ -32,4 +37,5 @@ def chatbot_api():
         return jsonify({"reply": f"Backend error: {str(e)}", "logs": []}), 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port, debug=False)
