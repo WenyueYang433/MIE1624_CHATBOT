@@ -10,11 +10,13 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 load_dotenv()
 
-DATA_DIR = "data"
-INDEX_DIR = "faiss_index"
-TMP_IMAGE_DIR = "_extracted_docx_images"
+DATA_DIR = os.path.join(BASE_DIR, "data")
+INDEX_DIR = os.getenv("INDEX_DIR", os.path.join(BASE_DIR, "faiss_index"))
+TMP_IMAGE_DIR = os.path.join(BASE_DIR, "_extracted_docx_images")
 VISION_MODEL = os.getenv("VISION_MODEL", "gpt-4.1-mini")
 
 client = OpenAI()
@@ -86,10 +88,7 @@ def load_docx_with_images(path: str, name: str):
             if image_summary:
                 docs.append(
                     Document(
-                        page_content=(
-                            f"[Image {idx} from {name}]\n"
-                            f"{image_summary}"
-                        ),
+                        page_content=f"[Image {idx} from {name}]\n{image_summary}",
                         metadata={
                             "source": name,
                             "type": "docx_image",
@@ -98,9 +97,9 @@ def load_docx_with_images(path: str, name: str):
                         }
                     )
                 )
-                print(f"Processed image {idx}: {os.path.basename(image_path)}")
+                print(f"Processed image {idx}: {os.path.basename(image_path)}", flush=True)
         except Exception as e:
-            print(f"Failed to analyze image {image_path}: {e}")
+            print(f"Failed to analyze image {image_path}: {e}", flush=True)
 
     return docs
 
@@ -108,9 +107,13 @@ def load_docs():
     docs = []
     os.makedirs(TMP_IMAGE_DIR, exist_ok=True)
 
+    if not os.path.exists(DATA_DIR):
+        raise FileNotFoundError(f"DATA_DIR not found: {DATA_DIR}")
+
     for name in os.listdir(DATA_DIR):
         path = os.path.join(DATA_DIR, name)
-
+        if not os.path.isfile(path):
+            continue
         if name.lower().endswith((".md", ".txt")):
             docs.extend(load_md_or_txt(path, name))
         elif name.lower().endswith(".docx"):
@@ -119,23 +122,28 @@ def load_docs():
     return docs
 
 def main():
+    print(f"cwd = {os.getcwd()}", flush=True)
+    print(f"BASE_DIR = {BASE_DIR}", flush=True)
+    print(f"DATA_DIR = {DATA_DIR}", flush=True)
+    print(f"INDEX_DIR = {INDEX_DIR}", flush=True)
+    print(f"DATA_DIR exists = {os.path.exists(DATA_DIR)}", flush=True)
+
     docs = load_docs()
     if not docs:
-        raise ValueError("No documents found in ./data.")
+        raise ValueError(f"No documents found in {DATA_DIR}")
 
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=900,
-        chunk_overlap=150
-    )
+    splitter = RecursiveCharacterTextSplitter(chunk_size=900, chunk_overlap=150)
     chunks = splitter.split_documents(docs)
+
+    os.makedirs(INDEX_DIR, exist_ok=True)
 
     embeddings = OpenAIEmbeddings()
     db = FAISS.from_documents(chunks, embeddings)
     db.save_local(INDEX_DIR)
 
-    print(f"Loaded {len(docs)} documents/fragments")
-    print(f"Built {len(chunks)} chunks")
-    print(f"Index built and saved to ./{INDEX_DIR}")
+    print(f"Loaded {len(docs)} documents/fragments", flush=True)
+    print(f"Built {len(chunks)} chunks", flush=True)
+    print(f"Index built and saved to {INDEX_DIR}", flush=True)
 
 if __name__ == "__main__":
     try:

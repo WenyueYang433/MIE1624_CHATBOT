@@ -6,7 +6,7 @@ const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const PYTHON_CHAT_API =
-  process.env.PYTHON_CHAT_API || "http://127.0.0.1:5001/api/chatbot";
+  process.env.PYTHON_CHAT_API || "http://127.0.0.1:8080/api/chatbot";
 const ENABLE_TTS = process.env.ENABLE_TTS === "true";
 
 const candidateDirs = [
@@ -40,25 +40,28 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.static(FRONTEND_DIR));
 
 async function callPythonChatbot(message, useRetrieval = true) {
-  const resp = await fetch(PYTHON_CHAT_API, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      message,
-      use_retrieval: useRetrieval
-    })
-  });
+  console.log("PYTHON_CHAT_API =", PYTHON_CHAT_API);
+  try {
+    const resp = await fetch(PYTHON_CHAT_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message,
+        use_retrieval: useRetrieval
+      })
+    });
 
-  if (!resp.ok) {
-    const text = await resp.text().catch(() => "");
-    throw new Error(`Python chatbot HTTP ${resp.status}: ${text}`);
+    const text = await resp.text();
+
+    if (!resp.ok) {
+      throw new Error(`Python HTTP ${resp.status}: ${text}`);
+    }
+
+    return JSON.parse(text);
+  } catch (err) {
+    console.error("callPythonChatbot failed:", err);
+    throw err;
   }
-
-  const data = await resp.json();
-  return {
-    reply: data.reply || "",
-    logs: Array.isArray(data.logs) ? data.logs : []
-  };
 }
 
 async function textToSpeech(text) {

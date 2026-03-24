@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from urllib.parse import urlparse
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from dotenv import load_dotenv
@@ -12,17 +13,28 @@ from crewai.tools import tool
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
+BASE_DIR = Path(__file__).resolve().parent
+DEFAULT_INDEX_DIR = BASE_DIR / "faiss_index"
+INDEX_DIR = Path(os.getenv("INDEX_DIR", str(DEFAULT_INDEX_DIR))).resolve()
+
 MODEL_NAME = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-INDEX_DIR = os.getenv("INDEX_DIR", "faiss_index")
 LOCAL_TOP_K = int(os.getenv("LOCAL_TOP_K", "3"))
 WEB_TOP_K = int(os.getenv("WEB_TOP_K", "5"))
 RESEARCH_TIMEOUT = int(os.getenv("RESEARCH_TIMEOUT", "20"))
 
 LAST_RETRIEVAL_LOGS = []
 
+index_faiss = INDEX_DIR / "index.faiss"
+index_pkl = INDEX_DIR / "index.pkl"
+if not index_faiss.exists() or not index_pkl.exists():
+    raise FileNotFoundError(
+        f"FAISS index files not found. INDEX_DIR={INDEX_DIR}, "
+        f"index.faiss exists={index_faiss.exists()}, index.pkl exists={index_pkl.exists()}"
+    )
+
 embeddings = OpenAIEmbeddings()
 db = FAISS.load_local(
-    INDEX_DIR,
+    str(INDEX_DIR),
     embeddings,
     allow_dangerous_deserialization=True
 )
