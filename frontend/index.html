@@ -7,44 +7,53 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app-layout">
-    <div class="chat-panel">
-      <div class="container">
-        <div class="top-bar">
-          <h1>Canada AI Strategy Chatbot</h1>
-          <div class="top-actions">
-            <a href="settings.html" class="settings-link">Settings</a>
+  <div class="app-shell">
+    <aside id="agentPanel" class="agent-panel">
+      <div class="agent-panel-header">
+        <div>
+          <div class="agent-panel-title">Agent Activity</div>
+          <div class="agent-panel-subtitle">Reasoning and tool trace</div>
+        </div>
+        <button id="closeAgentPanel" class="icon-btn" type="button" aria-label="Close agent panel">×</button>
+      </div>
+      <div id="agentLog" class="agent-log"></div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="toggleAgentPanel" class="topbar-btn" type="button">Logs</button>
+          <div class="brand-wrap">
+            <div class="brand-title">Canada AI Strategy Chatbot</div>
+            <div id="status" class="status-pill">Idle</div>
           </div>
         </div>
+        <div class="topbar-right">
+          <a href="settings.html" class="topbar-link">Settings</a>
+        </div>
+      </header>
 
-        <div id="status">Idle</div>
+      <section id="chatList" class="chat-list">
+        <div class="welcome-block">
+          <h1>Ask about Canada’s AI Strategy</h1>
+          <p>Ask something about Canada’s AI strategy, policy, market, or related research.</p>
+        </div>
+      </section>
 
-        <div id="chatList" class="chat-list"></div>
-
-        <div class="controls">
-          <textarea id="userText" placeholder="Ask something about Canada's AI strategy..."></textarea>
-          <div class="buttons">
-            <button id="micBtn">🎙️</button>
-            <button id="sendBtn">Send</button>
-            <button id="stopBtn">Stop Audio</button>
-            <button id="clearBtn">Clear</button>
+      <div class="composer-wrap">
+        <div class="composer">
+          <textarea id="userText" placeholder="Message Canada AI Strategy Chatbot..." rows="1"></textarea>
+          <div class="composer-actions">
+            <div class="composer-left">
+              <button id="stopBtn" class="ghost-btn" type="button">Stop Audio</button>
+              <button id="clearBtn" class="ghost-btn" type="button">Clear</button>
+            </div>
+            <button id="sendBtn" class="send-btn" type="button" aria-label="Send message">➤</button>
           </div>
         </div>
+        <div class="composer-hint">Enter to send, Shift + Enter for a new line</div>
       </div>
-    </div>
-
-    <div class="agent-panel">
-      <div class="agent-header">
-        <h2>Agent Activity</h2>
-      </div>
-      <div id="agentLog" class="agent-log">
-        <div class="log-item">
-          <div class="log-agent">System</div>
-          <div class="log-message">Waiting for a question...</div>
-          <div class="log-time">--:--:--</div>
-        </div>
-      </div>
-    </div>
+    </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>

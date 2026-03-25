@@ -4,17 +4,20 @@ const userText = document.getElementById("userText");
 const sendBtn = document.getElementById("sendBtn");
 const stopBtn = document.getElementById("stopBtn");
 const clearBtn = document.getElementById("clearBtn");
-const micBtn = document.getElementById("micBtn");
 const statusEl = document.getElementById("status");
+const agentPanel = document.getElementById("agentPanel");
+const toggleAgentPanelBtn = document.getElementById("toggleAgentPanel");
+const closeAgentPanelBtn = document.getElementById("closeAgentPanel");
 
 let currentAudio = null;
 let logRenderToken = 0;
 
+const overlay = document.createElement("div");
+overlay.className = "agent-panel-overlay";
+document.body.appendChild(overlay);
+
 function getSettings() {
-  const defaults = {
-    enableTTS: false,
-    enableRetrieval: true
-  };
+  const defaults = { enableTTS: false, enableRetrieval: true };
   try {
     const saved = JSON.parse(localStorage.getItem("chatbotSettings") || "{}");
     return {
@@ -32,14 +35,34 @@ function sleep(ms) {
 
 function renderMarkdown(text) {
   if (!window.marked) return text;
-  return marked.parse(text, {
-    breaks: true,
-    gfm: true
-  });
+  return marked.parse(text, { breaks: true, gfm: true });
+}
+
+function removeWelcomeBlock() {
+  const welcome = chatList.querySelector(".welcome-block");
+  if (welcome) welcome.remove();
+}
+
+function scrollChatToBottom() {
+  chatList.scrollTop = chatList.scrollHeight;
+}
+
+function autoResizeTextarea() {
+  if (!userText) return;
+  userText.style.height = "auto";
+  userText.style.height = Math.min(userText.scrollHeight, 220) + "px";
+}
+
+function createMessageRow(role) {
+  const row = document.createElement("div");
+  row.className = `message-row ${role === "user" ? "user-row" : "bot-row"}`;
+  return row;
 }
 
 function addMessage(text, role) {
   if (!chatList) return null;
+  removeWelcomeBlock();
+  const row = createMessageRow(role);
   const div = document.createElement("div");
   div.className = `message ${role}`;
   if (role === "bot") {
@@ -47,13 +70,15 @@ function addMessage(text, role) {
   } else {
     div.textContent = text;
   }
-  chatList.appendChild(div);
-  chatList.scrollTop = chatList.scrollHeight;
+  row.appendChild(div);
+  chatList.appendChild(row);
+  scrollChatToBottom();
   return div;
 }
 
 function showChatLoading(message = "Assistant is thinking...") {
-  if (!chatList) return null;
+  removeWelcomeBlock();
+  const row = createMessageRow("bot");
   const div = document.createElement("div");
   div.className = "message bot loading-bubble";
   div.innerHTML = `
@@ -62,9 +87,10 @@ function showChatLoading(message = "Assistant is thinking...") {
       <span>${message}</span>
     </div>
   `;
-  chatList.appendChild(div);
-  chatList.scrollTop = chatList.scrollHeight;
-  return div;
+  row.appendChild(div);
+  chatList.appendChild(row);
+  scrollChatToBottom();
+  return row;
 }
 
 function removeChatLoading(loadingEl) {
@@ -83,14 +109,13 @@ function addAgentLog(agent, message) {
     <div class="log-message"></div>
     <div class="log-time">${now}</div>
   `;
+  item.querySelector(".log-message").textContent = message;
   agentLog.appendChild(item);
-  const msgEl = item.querySelector(".log-message");
-  msgEl.textContent = message;
   agentLog.scrollTop = agentLog.scrollHeight;
   return item;
 }
 
-async function typeAgentLog(agent, message, speed = 20) {
+async function typeAgentLog(agent, message, speed = 14) {
   if (!agentLog) return null;
   const item = document.createElement("div");
   item.className = "log-item";
@@ -101,7 +126,6 @@ async function typeAgentLog(agent, message, speed = 20) {
     <div class="log-time">${now}</div>
   `;
   agentLog.appendChild(item);
-
   const msgEl = item.querySelector(".log-message");
   for (let i = 0; i < message.length; i++) {
     msgEl.textContent += message[i];
@@ -114,7 +138,7 @@ async function typeAgentLog(agent, message, speed = 20) {
 function showAgentLoading(message = "Agents are analyzing...") {
   if (!agentLog) return null;
   const item = document.createElement("div");
-  item.className = "log-item loading-item";
+  item.className = "log-item";
   const now = new Date().toLocaleTimeString();
   item.innerHTML = `
     <div class="log-agent">System</div>
@@ -140,7 +164,7 @@ function clearAgentLog() {
   agentLog.innerHTML = "";
 }
 
-async function renderLogsSequentially(logs, speed = 20, token = 0) {
+async function renderLogsSequentially(logs, speed = 14, token = 0) {
   if (!Array.isArray(logs) || !logs.length) {
     if (token !== logRenderToken) return;
     await typeAgentLog("System", "No detailed agent logs were returned.", speed);
@@ -160,6 +184,51 @@ function stopCurrentAudio() {
   }
 }
 
+function setStatus(text) {
+  if (statusEl) statusEl.textContent = text;
+}
+
+function setSendingState(isSending) {
+  if (!sendBtn || !userText) return;
+  sendBtn.disabled = isSending;
+  userText.disabled = isSending;
+}
+
+function isMobileLayout() {
+  return window.innerWidth <= 1100;
+}
+
+function openAgentPanel() {
+  if (!agentPanel) return;
+  if (isMobileLayout()) {
+    agentPanel.classList.add("open");
+    overlay.classList.add("show");
+  } else {
+    agentPanel.classList.remove("collapsed");
+  }
+}
+
+function closeAgentPanel() {
+  if (!agentPanel) return;
+  if (isMobileLayout()) {
+    agentPanel.classList.remove("open");
+    overlay.classList.remove("show");
+  } else {
+    agentPanel.classList.add("collapsed");
+  }
+}
+
+function toggleAgentPanel() {
+  if (!agentPanel) return;
+  if (isMobileLayout()) {
+    const isOpen = agentPanel.classList.contains("open");
+    if (isOpen) closeAgentPanel();
+    else openAgentPanel();
+  } else {
+    agentPanel.classList.toggle("collapsed");
+  }
+}
+
 async function sendMessage() {
   const question = userText ? userText.value.trim() : "";
   if (!question) return;
@@ -170,7 +239,9 @@ async function sendMessage() {
 
   addMessage(question, "user");
   userText.value = "";
-  statusEl.textContent = "Running...";
+  autoResizeTextarea();
+  setStatus("Running...");
+  setSendingState(true);
 
   logRenderToken += 1;
   const currentToken = logRenderToken;
@@ -183,7 +254,6 @@ async function sendMessage() {
     addAgentLog("System", "Retrieval mode disabled.");
     addAgentLog("Assistant", "Using direct chat mode.");
   }
-
   addAgentLog("System", `TTS setting: ${enableTTS ? "ON" : "OFF"}.`);
 
   const loadingEl = showAgentLoading(
@@ -196,9 +266,7 @@ async function sendMessage() {
   try {
     const res = await fetch("/api/chat", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message: question,
         enable_tts: enableTTS,
@@ -217,10 +285,10 @@ async function sendMessage() {
 
     const replyText = data.reply || "No response received.";
     addMessage(replyText, "bot");
-    statusEl.textContent = "Done";
+    setStatus("Done");
 
     clearAgentLog();
-    renderLogsSequentially(data.logs, 20, currentToken);
+    renderLogsSequentially(data.logs, 14, currentToken);
 
     if (enableTTS && data.audio) {
       stopCurrentAudio();
@@ -242,8 +310,11 @@ async function sendMessage() {
     console.error(err);
     addMessage("Error: failed to connect to backend.", "bot");
     clearAgentLog();
-    await typeAgentLog("System", "Backend request failed: " + err.message, 20);
-    statusEl.textContent = "Error";
+    await typeAgentLog("System", "Backend request failed: " + err.message, 14);
+    setStatus("Error");
+  } finally {
+    setSendingState(false);
+    if (userText) userText.focus();
   }
 }
 
@@ -252,22 +323,31 @@ if (sendBtn) {
 }
 
 if (userText) {
+  userText.addEventListener("input", autoResizeTextarea);
   userText.addEventListener("keydown", e => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   });
+  autoResizeTextarea();
 }
 
 if (clearBtn) {
   clearBtn.addEventListener("click", () => {
     logRenderToken += 1;
     stopCurrentAudio();
-    if (chatList) chatList.innerHTML = "";
+    if (chatList) {
+      chatList.innerHTML = `
+        <div class="welcome-block">
+          <h1>Ask about Canada’s AI Strategy</h1>
+          <p>Ask something about Canada’s AI strategy, policy, market, or related research.</p>
+        </div>
+      `;
+    }
     clearAgentLog();
     addAgentLog("System", "Waiting for a question...");
-    statusEl.textContent = "Idle";
+    setStatus("Idle");
   });
 }
 
@@ -275,15 +355,31 @@ if (stopBtn) {
   stopBtn.addEventListener("click", () => {
     stopCurrentAudio();
     addAgentLog("System", "Current audio stopped.");
-    statusEl.textContent = "Idle";
+    setStatus("Idle");
   });
 }
 
-if (micBtn) {
-  micBtn.addEventListener("click", () => {
-    addAgentLog("System", "Microphone input is not configured.");
-  });
+if (toggleAgentPanelBtn) {
+  toggleAgentPanelBtn.addEventListener("click", toggleAgentPanel);
 }
+
+if (closeAgentPanelBtn) {
+  closeAgentPanelBtn.addEventListener("click", closeAgentPanel);
+}
+
+overlay.addEventListener("click", closeAgentPanel);
+
+window.addEventListener("resize", () => {
+  if (!isMobileLayout()) {
+    overlay.classList.remove("show");
+    agentPanel.classList.remove("open");
+  } else {
+    if (!agentPanel.classList.contains("open")) {
+      overlay.classList.remove("show");
+    }
+  }
+});
 
 clearAgentLog();
 addAgentLog("System", "Waiting for a question...");
+setStatus("Idle");

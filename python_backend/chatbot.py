@@ -19,7 +19,7 @@ INDEX_DIR = Path(os.getenv("INDEX_DIR", str(DEFAULT_INDEX_DIR))).resolve()
 
 MODEL_NAME = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 LOCAL_TOP_K = int(os.getenv("LOCAL_TOP_K", "3"))
-WEB_TOP_K = int(os.getenv("WEB_TOP_K", "5"))
+WEB_TOP_K = int(os.getenv("WEB_TOP_K", "3"))
 RESEARCH_TIMEOUT = int(os.getenv("RESEARCH_TIMEOUT", "20"))
 
 LAST_RETRIEVAL_LOGS = []
@@ -69,7 +69,7 @@ def retrieve_local_context(query: str) -> str:
         source = d.metadata.get("source", "unknown_source")
         filename = _basename(source)
         content = d.page_content.strip()
-        short_content = content[:800]
+        short_content = content[:300]
         snippet = content[:180].replace("\n", " ").strip()
         results.append(f"[Local Doc {i}] File: {filename}\n{short_content}")
         if filename not in seen_files:
@@ -153,7 +153,7 @@ def build_agents():
         llm=llm,
         verbose=False,
         memory=False,
-        max_iter=2,
+        max_iter=1,
         allow_delegation=False
     )
 
@@ -169,7 +169,7 @@ def build_agents():
         llm=llm,
         verbose=False,
         memory=False,
-        max_iter=2,
+        max_iter=1,
         allow_delegation=False
     )
 
@@ -187,7 +187,6 @@ def build_agents():
         max_iter=1,
         allow_delegation=False
     )
-
     return local_researcher, web_researcher, analyst
 
 def run_single_research_crew(agent: Agent, task: Task) -> str:
@@ -288,7 +287,7 @@ def run_chatbot(user_question: str, use_retrieval: bool = True):
                 "- Compare local and web evidence only when necessary.\n"
                 "- State uncertainty only if it changes the answer.\n"
                 "- Write the final answer directly.\n"
-                "- Keep it very short: maximum 250 words.\n"
+                "- Keep it very short: maximum 200 words.\n"
                 "- Use at most 3 bullet points.\n"
                 "- Prefer simple sentences.\n"
                 "- Do not introduce facts not supported by the two bundles.\n"
