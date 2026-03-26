@@ -25,43 +25,76 @@ The system uses a **Node.js server** to serve the frontend and forward chat requ
 
 ## Project Structure
 
+## Project Structure
+
 ```text
 .
-├── frontend/                 # Frontend static files
-├── python_backend/           # Python backend
-│   ├── app.py                # Flask API
-│   ├── chatbot.py            # Main chatbot logic
-│   ├── build_index.py        # Build FAISS index from local documents
-│   ├── data/                 # Local source documents
-│   └── faiss_index/          # Saved FAISS index
-├── server/                   # Node.js web server
-│   ├── server.js
-│   └── package.json
-├── requirements.txt
-├── Dockerfile
-└── .dockerignore
-
+├── frontend/                     # Frontend static files
+│   ├── index.html               # Main chat page
+│   ├── script.js                # Frontend chat logic
+│   ├── settings.html            # Settings page
+│   ├── settings.js              # Settings page logic
+│   └── style.css                # Frontend styles
+├── python_backend/              # Python backend
+│   ├── data/                    # Local source documents
+│   ├── faiss_index/             # FAISS index files
+│   │   ├── index.faiss
+│   │   └── index.pkl
+│   ├── .env                     # Backend environment variables
+│   ├── app.py                   # Flask API
+│   ├── build_index.py           # Build FAISS index
+│   └── chatbot.py               # Main chatbot logic
+├── server/                      # Node.js server
+│   ├── .env                     # Server environment variables
+│   ├── package-lock.json
+│   ├── package.json
+│   └── server.js                # Node.js server entry
+├── .gitignore
+├── README.md
+└── requirements.txt
+```
 ## Development Environment
 
-This project was developed and tested with the following local environment:
-
-- **Operating System:** Windows
-- **Node.js:** v24.14.0
-- **npm:** 11.9.0
-- **Python:** 3.11.9
-- **pip:** 26.0.1
-- **Git:** 2.51.1
+- Windows
+- Node.js 24.14.0
+- npm 11.9.0
+- Python 3.11.9
+- pip 26.0.1
+- Git 2.51.1
 
 ## Prerequisites
 
-Before running the project, make sure the following software is installed:
+Before running the project, make sure you have installed:
 
-- **Node.js**
-- **npm**
-- **Python 3.11+**
-- **pip**
-- **Git**
+- Node.js
+- npm
+- Python 3.11+
+- pip
+- Git
 
-An **OpenAI API key** is also required for chatbot generation and optional text-to-speech features.
+## Installation
 
+Clone the repository:
 
+```bash
+git clone <your-repository-url>
+cd <your-repository-folder>
+```
+
+Install Python dependencies:
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+Install Node.js dependencies:
+
+```bash
+cd server
+npm install
+cd ..
+```
+
+## Environment Variables
