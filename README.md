@@ -6,13 +6,16 @@ The project supports local document retrieval, optional web search, multi-agent 
 
 This project is a web-based chatbot designed to answer user questions by combining:
 
-- Local document retrieval with FAISS
+- Multi-Agent Cooperation [1]
+- Local document retrieval with FAISS [2]
 - LLM-based response generation
-- Optional web search
+- Optional web search  [2]
 - Optional text-to-speech (TTS)
 - A simple browser-based frontend
-
+- There is an implicit internal iteration feature that requires modifying the max_iter parameter in the chatbot.py file.  [3]
+  
 The system uses a **Node.js server** to serve the frontend and forward chat requests, while a **Flask backend** handles retrieval and response generation.
+
 
 ## Features
 
