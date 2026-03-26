@@ -40,3 +40,28 @@ The system uses a **Node.js server** to serve the frontend and forward chat requ
 ├── requirements.txt
 ├── Dockerfile
 └── .dockerignore
+
+## Development Environment
+
+This project was developed and tested with the following local environment:
+
+- **Operating System:** Windows
+- **Node.js:** v24.14.0
+- **npm:** 11.9.0
+- **Python:** 3.11.9
+- **pip:** 26.0.1
+- **Git:** 2.51.1
+
+## Prerequisites
+
+Before running the project, make sure the following software is installed:
+
+- **Node.js**
+- **npm**
+- **Python 3.11+**
+- **pip**
+- **Git**
+
+An **OpenAI API key** is also required for chatbot generation and optional text-to-speech features.
+
+
