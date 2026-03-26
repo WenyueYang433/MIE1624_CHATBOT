@@ -17,12 +17,12 @@ overlay.className = "agent-panel-overlay";
 document.body.appendChild(overlay);
 
 function getSettings() {
-  const defaults = { enableTTS: false, enableRetrieval: true };
+  const defaults = { enableTTS: false, enableWebSearch: true };
   try {
     const saved = JSON.parse(localStorage.getItem("chatbotSettings") || "{}");
     return {
       enableTTS: saved.enableTTS ?? defaults.enableTTS,
-      enableRetrieval: saved.enableRetrieval ?? defaults.enableRetrieval
+      enableWebSearch: saved.enableWebSearch ?? defaults.enableWebSearch
     };
   } catch (err) {
     return defaults;
@@ -235,7 +235,7 @@ async function sendMessage() {
 
   const settings = getSettings();
   const enableTTS = settings.enableTTS;
-  const useRetrieval = settings.enableRetrieval;
+  const enableWebSearch = settings.enableWebSearch;
 
   addMessage(question, "user");
   userText.value = "";
@@ -247,19 +247,14 @@ async function sendMessage() {
   const currentToken = logRenderToken;
 
   clearAgentLog();
-  if (useRetrieval) {
-    addAgentLog("System", "Retrieval mode enabled.");
-    addAgentLog("Researcher", "Knowledge base search initialized.");
-  } else {
-    addAgentLog("System", "Retrieval mode disabled.");
-    addAgentLog("Assistant", "Using direct chat mode.");
-  }
+  addAgentLog("System", `Web search: ${enableWebSearch ? "ON" : "OFF"}.`);
+  addAgentLog("System", "Local file retrieval: ON.");
   addAgentLog("System", `TTS setting: ${enableTTS ? "ON" : "OFF"}.`);
 
   const loadingEl = showAgentLoading(
-    useRetrieval
-      ? "Agents are analyzing and retrieving evidence..."
-      : "Agents are analyzing the question..."
+    enableWebSearch
+      ? "Agents are analyzing, retrieving local files, and searching the web..."
+      : "Agents are analyzing and retrieving only local files..."
   );
   const chatLoadingEl = showChatLoading("Assistant is thinking...");
 
@@ -270,7 +265,7 @@ async function sendMessage() {
       body: JSON.stringify({
         message: question,
         enable_tts: enableTTS,
-        use_retrieval: useRetrieval
+        enable_web_search: enableWebSearch
       })
     });
 

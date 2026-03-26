@@ -26,12 +26,12 @@ def chatbot_api():
     try:
         data = request.get_json(silent=True) or {}
         message = str(data.get("message", "")).strip()
-        use_retrieval = to_bool(data.get("use_retrieval", True), True)
+        enable_web_search = to_bool(data.get("enable_web_search", True), True)
 
         if not message:
             return jsonify({"reply": "Message is empty.", "logs": []}), 400
 
-        result = run_chatbot(message, use_retrieval=use_retrieval)
+        result = run_chatbot(message, enable_web_search=enable_web_search)
         return jsonify(result)
     except Exception as e:
         return jsonify({"reply": f"Backend error: {str(e)}", "logs": []}), 500

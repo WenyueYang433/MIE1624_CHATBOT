@@ -1,6 +1,6 @@
 const defaultSettings = {
   enableTTS: false,
-  enableRetrieval: true
+  enableWebSearch: true
 };
 
 function loadSettings() {
@@ -11,14 +11,14 @@ function loadSettings() {
 function fillForm(settings) {
   document.getElementById("enableTTS").checked =
     settings.enableTTS ?? defaultSettings.enableTTS;
-  document.getElementById("enableRetrieval").checked =
-    settings.enableRetrieval ?? defaultSettings.enableRetrieval;
+  document.getElementById("enableWebSearch").checked =
+    settings.enableWebSearch ?? defaultSettings.enableWebSearch;
 }
 
 function readForm() {
   return {
     enableTTS: document.getElementById("enableTTS").checked,
-    enableRetrieval: document.getElementById("enableRetrieval").checked
+    enableWebSearch: document.getElementById("enableWebSearch").checked
   };
 }
 

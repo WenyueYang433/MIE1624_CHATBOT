@@ -39,7 +39,7 @@ const INDEX_HTML = path.join(FRONTEND_DIR, "index.html");
 app.use(express.json({ limit: "1mb" }));
 app.use(express.static(FRONTEND_DIR));
 
-async function callPythonChatbot(message, useRetrieval = true) {
+async function callPythonChatbot(message, enableWebSearch = true) {
   console.log("PYTHON_CHAT_API =", PYTHON_CHAT_API);
   try {
     const resp = await fetch(PYTHON_CHAT_API, {
@@ -47,7 +47,7 @@ async function callPythonChatbot(message, useRetrieval = true) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message,
-        use_retrieval: useRetrieval
+        enable_web_search: enableWebSearch
       })
     });
 
@@ -94,12 +94,12 @@ async function textToSpeech(text) {
 app.post("/api/chat", async (req, res) => {
   try {
     const message = String(req.body?.message || "").trim();
-    const useRetrieval = toBoolean(req.body?.use_retrieval, true);
+    const enableWebSearch = toBoolean(req.body?.enable_web_search, true);
     const enableTTS = toBoolean(req.body?.enable_tts, ENABLE_TTS);
 
     console.log("Incoming /api/chat:", {
       message,
-      use_retrieval: useRetrieval,
+      enable_web_search: enableWebSearch,
       enable_tts: enableTTS
     });
 
@@ -111,9 +111,9 @@ app.post("/api/chat", async (req, res) => {
       });
     }
 
-    const result = await callPythonChatbot(message, useRetrieval);
+    const result = await callPythonChatbot(message, enableWebSearch);
     const reply = result.reply;
-    const logs = result.logs;
+    const logs = result.logs || [];
 
     let audio = null;
     if (enableTTS && reply) {
