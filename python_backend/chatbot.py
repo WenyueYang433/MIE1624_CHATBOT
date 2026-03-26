@@ -18,7 +18,7 @@ INDEX_DIR = Path(os.getenv("INDEX_DIR", str(DEFAULT_INDEX_DIR))).resolve()
 
 MODEL_NAME = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 LOCAL_TOP_K = int(os.getenv("LOCAL_TOP_K", "2"))
-WEB_TOP_K = int(os.getenv("WEB_TOP_K", "2"))
+WEB_TOP_K = int(os.getenv("WEB_TOP_K", "5"))
 RESEARCH_TIMEOUT = int(os.getenv("RESEARCH_TIMEOUT", "15"))
 
 LAST_RETRIEVAL_LOGS = []
