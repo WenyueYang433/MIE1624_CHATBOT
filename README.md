@@ -97,4 +97,25 @@ npm install
 cd ..
 ```
 
-## Environment Variables
+## Multi-Agent Design
+
+The chatbot adopts a simple multi-agent architecture consisting of two parallel research components and one analysis component.
+
+### 1. LocalResearcher
+The LocalResearcher is responsible for retrieving relevant information from the local document collection. It uses a FAISS vector index to search embedded document chunks and returns the most relevant local evidence for the user query.
+
+### 2. WebResearcher
+The WebResearcher is responsible for optional external information retrieval. When web search is enabled, it searches online sources and returns a small set of relevant results as supplementary evidence.
+
+### 3. Analyst
+The Analyst is the final reasoning agent. It reads the outputs from both research components, keeps only the most important findings, prioritizes local evidence when it is directly relevant, and generates the final user-facing answer.
+
+### Execution Flow
+```mermaid
+flowchart LR
+    A[User Query] --> B[LocalResearcher]
+    A --> C[WebResearcher<br/>optional]
+    B --> D[Analyst]
+    C --> D
+    D --> E[Final Response]
+```
