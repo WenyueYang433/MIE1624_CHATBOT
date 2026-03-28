@@ -97,6 +97,18 @@ cd server
 npm install
 cd ..
 ```
+## Run the Project
+
+After installation, start the Python backend first:
+
+```bash
+cd python_backend
+python app.py
+```
+```bash
+cd server
+node server.js
+```
 
 ## Multi-Agent Design
 
