@@ -122,3 +122,16 @@ flowchart LR
     C --> D
     D --> E[Final Response]
 ```
+## Screenshots
+
+### Home Page
+
+The main chat interface allows users to ask questions, view chatbot responses.
+
+![Home Page](images/home.png)
+
+### Settings Page
+
+The settings page: The TTS and web search modes can be turned on and off.
+
+![Settings Page](images/settings.png)
