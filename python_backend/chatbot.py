@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from dotenv import load_dotenv
 
+#environment variable
 load_dotenv()
 os.environ["CREWAI_DISABLE_TELEMETRY"] = "true"
 os.environ["OTEL_SDK_DISABLED"] = "true"
@@ -35,6 +36,7 @@ embeddings = OpenAIEmbeddings()
 db = FAISS.load_local(str(INDEX_DIR), embeddings, allow_dangerous_deserialization=True)
 retriever = db.as_retriever(search_kwargs={"k": LOCAL_TOP_K})
 
+#Extract the file name
 def _basename(source: str) -> str:
     if not source:
         return "unknown_file"
@@ -46,6 +48,7 @@ def _domain(url: str) -> str:
     except Exception:
         return "unknown_site"
 
+#Local Knowledge Base Search
 def retrieve_local_context(query: str) -> str:
     global LAST_RETRIEVAL_LOGS
     docs = retriever.invoke(query)
@@ -78,6 +81,7 @@ def retrieve_local_context(query: str) -> str:
     })
     return "\n\n".join(results)
 
+#web search
 def search_web(query: str) -> str:
     global LAST_RETRIEVAL_LOGS
     try:
@@ -137,6 +141,7 @@ def search_web(query: str) -> str:
 
 llm = LLM(model=MODEL_NAME, temperature=0)
 
+#Generate the final answer
 analyst = Agent(
     role="Analyst",
     goal="Analyze the research evidence and produce the final answer.",
@@ -158,6 +163,7 @@ def _run_local_research(query: str) -> str:
 def _run_web_research(query: str) -> str:
     return search_web(query)
 
+#Parallel Execution of Local Search and Network Search
 def run_parallel_research(user_question: str, enable_web_search: bool = True):
     local_result = "No local research result."
     web_result = "Web search disabled."
@@ -213,6 +219,7 @@ def run_parallel_research(user_question: str, enable_web_search: bool = True):
 
     return local_result, web_result
 
+#The main logic of the chatbot
 def run_chatbot(user_question: str, enable_web_search: bool = True):
     global LAST_RETRIEVAL_LOGS
     LAST_RETRIEVAL_LOGS = []
@@ -223,24 +230,26 @@ def run_chatbot(user_question: str, enable_web_search: bool = True):
     )
 
     analysis_task = Task(
-        description=(
-            f"User question: {user_question}\n\n"
-            "You are given two research bundles.\n\n"
-            "LOCAL RESEARCH BUNDLE:\n"
-            f"{local_research_bundle}\n\n"
-            "WEB RESEARCH BUNDLE:\n"
-            f"{web_research_bundle}\n\n"
-            "Your job is to directly produce the final answer for the user.\n"
-            "Requirements:\n"
-            "- Analyze both bundles.\n"
-            "- Keep only the most important findings.\n"
-            "- Prefer local evidence when it is directly relevant.\n"
-            "- Use web evidence as supplementary evidence.\n"
-            "- State uncertainty only if it affects the answer.\n"
-            "- Maximum 200 words.\n"
-            "- Use at most 3 bullet points.\n"
-            "- Do not add unsupported facts."
-        ),
+    description=(
+        f"User question: {user_question}\n\n"
+        "You are given two research bundles.\n\n"
+        "LOCAL RESEARCH BUNDLE:\n"
+        f"{local_research_bundle}\n\n"
+        "WEB RESEARCH BUNDLE:\n"
+        f"{web_research_bundle}\n\n"
+        "Your role is to answer questions specifically related to Canada's AI strategy.\n\n"
+        "Instructions:\n"
+        "- First determine whether the user question is related to AI strategy.\n"
+        "- If the question is unrelated, do not answer it directly. Instead, politely explain that your role is limited to answering questions about Canada's AI strategy.\n"
+        "- If the question is related, analyze both research bundles before answering.\n"
+        "- Prefer local evidence when it is directly relevant.\n"
+        "- Use web evidence only as supplementary support.\n"
+        "- Keep only the most important findings.\n"
+        "- State uncertainty only when it materially affects the answer.\n"
+        "- Do not add unsupported facts.\n"
+        "- Use the response format that best fits the question. You may use paragraphs, short lists, or bullet points only when helpful.\n"
+        "- Keep the answer concise and clear, with a maximum of 200 words."
+    ),
         expected_output="A short, grounded final answer.",
         agent=analyst
     )
