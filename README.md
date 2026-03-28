@@ -99,6 +99,8 @@ cd ..
 ```
 ## Run the Project
 
+**All [.env] files need to have the OPENAI_API_KEY field modified !!**
+
 After installation, start the Python backend first:
 
 ```bash
