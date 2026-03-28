@@ -122,7 +122,7 @@ flowchart LR
     C --> D
     D --> E[Final Response]
 ```
-## Screenshots
+## UI
 
 ### Home Page
 
