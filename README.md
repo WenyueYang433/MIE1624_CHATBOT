@@ -1,32 +1,32 @@
 # Group 7 Chatbot
-An AI web chatbot system built with a Node.js frontend server and a Python backend.  
-The project supports local document retrieval, optional web search, multi-agent assistance and text-to-speech output.
+An AI web chatbot system.
 
 ## Project Overview
+This project is a web-based chatbot designed to answer user questions through a combination of local document retrieval, optional web search, and LLM-based response generation. It also supports optional text-to-speech output and provides a simple browser-based frontend for user interaction.
 
-This project is a web-based chatbot designed to answer user questions by combining:
-
-- Multi-Agent Cooperation [1]
-- Local document retrieval with FAISS [2]
-- LLM-based response generation
-- Optional web search  [2]
-- Optional text-to-speech (TTS)
-- A simple browser-based frontend
-- There is an implicit internal iteration feature that requires modifying the max_iter parameter in the chatbot.py file.  [3]
-  
-The system uses a **Node.js server** to serve the frontend and forward chat requests, while a **Flask backend** handles retrieval and response generation.
+The system adopts a lightweight multi-agent-inspired design. Local document retrieval and optional web retrieval act as parallel research components, while an analysis component synthesizes the collected evidence into the final response. A Node.js server is used to serve the frontend and forward chat requests, while a Flask backend handles retrieval and response generation.
 
 
 ## Features
 
-- Chat interface in browser
-- Retrieval-augmented generation from local files
-- FAISS vector index for efficient document search
-- Optional web information retrieval
-- Optional text-to-speech output using OpenAI audio API
-- Deployable on Google Cloud Run
+- Chat interface in browser 
+- Retrieval-augmented generation (RAG) from local files [2]
+- FAISS vector index for efficient semantic search 
+- Optional web retrieval for supplementary information [2]
+- Lightweight multi-agent-inspired workflow [1]
+- Optional text-to-speech output using the OpenAI audio API
+- There is an implicit internal iteration feature that requires modifying the max_iter parameter in the chatbot.py file.  [3]
+- 
+## Tech Stack
 
-## Project Structure
+- Frontend: HTML, CSS, JavaScript
+- Frontend server: Node.js
+- Backend API: Flask
+- LLM orchestration: CrewAI
+- Vector retrieval: LangChain + FAISS
+- Embeddings: OpenAI Embeddings
+- Optional web search: DuckDuckGo Search (ddgs)
+- Optional speech output: OpenAI Audio API
 
 ## Project Structure
 
@@ -112,7 +112,7 @@ node server.js
 
 ## Multi-Agent Design
 
-The chatbot adopts a simple multi-agent architecture consisting of two parallel research components and one analysis component.
+The chatbot adopts a lightweight multi-agent-inspired architecture consisting of two parallel research components and one analysis component.
 
 ### 1. LocalResearcher
 The LocalResearcher is responsible for retrieving relevant information from the local document collection. It uses a FAISS vector index to search embedded document chunks and returns the most relevant local evidence for the user query.
