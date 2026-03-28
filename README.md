@@ -105,6 +105,7 @@ After installation, start the Python backend first:
 cd python_backend
 python app.py
 ```
+Server:
 ```bash
 cd server
 node server.js
