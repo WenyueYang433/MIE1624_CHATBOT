@@ -12,3 +12,4 @@ beautifulsoup4
 lxml
 tiktoken
 duckduckgo_search
+docx2txt
